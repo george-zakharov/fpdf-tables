@@ -1,5 +1,8 @@
 {
 	"name": "smichaelsen/fpdf-tables",
+	"require": {
+        	"setasign/fpdf": "1.8.*"
+	},
 	"autoload": {
 		"psr-4": {
 			"Smichaelsen\\FpdfTable\\": "Classes/"
