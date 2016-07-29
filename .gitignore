@@ -1,0 +1,8 @@
+{
+	"name": "smichaelsen/fpdf-tables",
+	"autoload": {
+		"psr-4": {
+			"Smichaelsen\\FpdfTable\\": "Classes/"
+		}
+	}
+}
