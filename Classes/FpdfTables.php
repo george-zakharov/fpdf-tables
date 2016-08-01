@@ -1316,21 +1316,9 @@ class FpdfTables extends \FPDF
      */
     protected function _tbAddDataToCache($data, $sDataType = 'data')
     {
-
-
         if (!is_array($data)) {
             //this is fatal error
             trigger_error("Invalid data value 0x00012. (not array)", E_USER_ERROR);
-        }
-
-        //IF UTF8 Support is needed then
-        if (isset($this->utf8_support) && ($this->utf8_support)) {
-            for ($i = 0; $i < $this->iColumnsNr; $i++) {
-                $data[$i]['TEXT'] = utf8_decode($data[$i]['TEXT']);
-            }
-
-            //keep the compatibility with the "old" fpdf utf8 support.
-            if (isset($this->utf8_decoded)) $this->utf8_decoded = true;
         }
 
         $aDataCache = [];
@@ -1377,11 +1365,6 @@ class FpdfTables extends \FPDF
             $data[$i]['ROWSPAN_ID'] = 0;    //rowspan ID
             $data[$i]['HEIGHT'] = 0;    //default HEIGHT
 
-            if ($data[$i]['LN_SIZE'] <= 0) {
-                trigger_error("Invalid Line Size {$data[$i]['LN_SIZE']}", E_USER_ERROR);
-            }
-
-
             //if there is an active colspan on this line we just skip this cell
             if ($iActiveColspan > 1) {
                 $data[$i]['SKIP'] = true;
@@ -1390,6 +1373,9 @@ class FpdfTables extends \FPDF
                 continue;
             }
 
+            if ($data[$i]['LN_SIZE'] <= 0) {
+                trigger_error('Invalid Line Size in column: ' . print_r($data[$i], true), E_USER_ERROR);
+            }
 
             if (!empty($aLastDataCache)) {
 
