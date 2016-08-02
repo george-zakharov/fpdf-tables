@@ -1301,9 +1301,9 @@ class FpdfTables extends \FPDF
      * @param bool $header - Array Containing data is Header Data or Data Data
      * @return    null
      */
-    public function tbDrawData($data, $header = true)
+    public function tbDrawData($data, $header = false)
     {
-        $this->_tbAddDataToCache($data, $header);
+        $this->_tbAddDataToCache($data, $header ? 'header' : 'data');
     }
 
     /**
@@ -2241,7 +2241,7 @@ class FpdfTables extends \FPDF
             $this->x = $x;
         }
 
-    }//function tbMultiCellTbl
+    }
 
 
     /**
