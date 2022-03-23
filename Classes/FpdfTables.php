@@ -98,7 +98,7 @@ class FpdfTables extends \FPDF
      * @param string $family - text font family name
      * @param string $style - text font style
      * @param int $size - text font size
-     * @param array $color - text color
+     * @param string $color - text color
      * @return    void
      */
     public function SetStyle($tag, $family, $style, $size, $color)
