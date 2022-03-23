@@ -1,10 +1,9 @@
 <?php
-namespace Smichaelsen\FpdfTables;
 
+namespace GeorgeZakharov\FpdfTablesExtended;
 
 class StringTags
 {
-
     /**
      * Contains the Tag/String Correspondence
      *
@@ -49,7 +48,6 @@ class StringTags
      */
     protected function OpenTag($p_tag, $p_array)
     {
-
         $aTAGS = &$this->aTAGS;
         $aHREF = &$this->aHREF;
         $maxElem = &$this->iTagMaxElem;
@@ -63,19 +61,24 @@ class StringTags
         $sHREF = array();
         if (isset($reg[2])) {
             preg_match_all("|([^ ]*)=[\"'](.*)[\"']|U", $reg[2], $out, PREG_PATTERN_ORDER);
-            for ($i = 0; $i < count($out[0]); $i++) {
+            $outCount = count($out[0]);
+            for ($i = 0; $i < $outCount; $i++) {
                 $out[2][$i] = preg_replace("(\"|')", "", $out[2][$i]);
-                array_push($sHREF, array($out[1][$i], $out[2][$i]));
+                $sHREF[] = array($out[1][$i], $out[2][$i]);
             }
         }
 
-        if (in_array($p_tag, $aTAGS)) return false;//tag already opened
+        if (in_array($p_tag, $aTAGS)) {
+            //tag already opened
+            return false;
+        }
 
         if (in_array("</$p_tag>", $p_array)) {
-            array_push($aTAGS, $p_tag);
-            array_push($aHREF, $sHREF);
+            $aTAGS[] = $p_tag;
+            $aHREF[] = $sHREF;
             return true;
         }
+
         return false;
     }
 
@@ -94,7 +97,6 @@ class StringTags
      */
     protected function CloseTag($p_tag)
     {
-
         $aTAGS = &$this->aTAGS;
         $aHREF = &$this->aHREF;
         $maxElem = &$this->iTagMaxElem;
@@ -110,6 +112,7 @@ class StringTags
             array_pop($aHREF);
             return true;
         }
+
         return false;
     }// CloseTag
 
@@ -118,21 +121,21 @@ class StringTags
      *
      * @access    protected
      * @param    array $pResult
-     * @return    string
      */
     protected function expand_parameters($pResult)
     {
         $aTmp = $pResult['params'];
-        if ($aTmp <> '')
-            for ($i = 0; $i < count($aTmp); $i++) {
+        if ($aTmp <> '') {
+            $aTmpCount = count($aTmp);
+            for ($i = 0; $i < $aTmpCount; $i++) {
                 $pResult[$aTmp[$i][0]] = $aTmp[$i][1];
             }
+        }
 
         unset($pResult['params']);
 
         return $pResult;
     }
-
 
     /**
      * Optimizes the result of the tag result array
@@ -145,7 +148,6 @@ class StringTags
      */
     protected function optimize_tags($result)
     {
-
         if (count($result) == 0) {
             return $result;
         }
@@ -161,7 +163,7 @@ class StringTags
                 $current['text'] .= $result[$i]['text'];
             } else {
                 $current = $this->expand_parameters($current);
-                array_push($res_result, $current);
+                $res_result[] = $current;
                 $current = $result[$i];
             }
 
@@ -169,11 +171,10 @@ class StringTags
         }
 
         $current = $this->expand_parameters($current);
-        array_push($res_result, $current);
+        $res_result[] = $current;
 
         return $res_result;
     }
-
 
     /**
      * Parses a string and returnes the result
@@ -198,7 +199,6 @@ class StringTags
      */
     public function get_tags($p_str)
     {
-
         $aTAGS = &$this->aTAGS;
         $aHREF = &$this->aHREF;
         $aTAGS = array();
@@ -209,8 +209,10 @@ class StringTags
         $sTAG = "";
         $sHREF = "";
 
-        while (list($key, $val) = each($reg)) {
-            if ($val == "") continue;
+        foreach ($reg as $val) {
+            if ($val == "") {
+                continue;
+            }
 
             if ($this->OpenTag($val, $reg)) {
                 $sTAG = (($temp = end($aTAGS)) != NULL) ? $temp : "";
@@ -219,12 +221,12 @@ class StringTags
                 $sTAG = (($temp = end($aTAGS)) != NULL) ? $temp : "";
                 $sHREF = (($temp = end($aHREF)) != NULL) ? $temp : "";
             } else {
-                if ($val != "")
-                    array_push($result, array('text' => $val, 'tag' => $sTAG, 'params' => $sHREF));
+                if ($val != "") {
+                    $result[] = array('text' => $val, 'tag' => $sTAG, 'params' => $sHREF);
+                }
             }
         }
 
         return $this->optimize_tags($result);
     }
-
 }

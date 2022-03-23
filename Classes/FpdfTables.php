@@ -1,11 +1,13 @@
 <?php
-namespace Smichaelsen\FpdfTables;
 
-if (!defined('PARAGRAPH_STRING')) define('PARAGRAPH_STRING', '~~~');
+namespace GeorgeZakharov\FpdfTablesExtended;
+
+if (!defined('PARAGRAPH_STRING')) {
+    define('PARAGRAPH_STRING', '~~~');
+}
 
 class FpdfTables extends \FPDF
 {
-
     /**
      * Valid Tag Maximum Width
      * @var int
@@ -54,7 +56,6 @@ class FpdfTables extends \FPDF
      */
     protected $TagStyle;
 
-
     /**
      * Sets the Tags Maximum width
      *
@@ -66,12 +67,10 @@ class FpdfTables extends \FPDF
         $this->wt_TagWidthMax = $iWidth;
     }
 
-
     /**
      * Resets the current class internal variables to default values
      *
      * @access    protected
-     * @param none
      * @return    void
      */
     protected function mt_Reset_Datas()
@@ -79,9 +78,9 @@ class FpdfTables extends \FPDF
         $this->wt_Current_Tag = "";
         $this->wt_DataInfo = [];
         $this->wt_DataExtraInfo = array(
-            "LAST_LINE_BR" => "",        //CURRENT LINE BREAK TYPE
+            "LAST_LINE_BR"    => "",        //CURRENT LINE BREAK TYPE
             "CURRENT_LINE_BR" => "",    //LAST LINE BREAK TYPE
-            "TAB_WIDTH" => 10            //The tab WIDTH IS IN mm
+            "TAB_WIDTH"       => 10            //The tab WIDTH IS IN mm
         );
 
         //if another measure unit is used ... calculate your OWN
@@ -104,9 +103,13 @@ class FpdfTables extends \FPDF
      */
     public function SetStyle($tag, $family, $style, $size, $color)
     {
+        if ($tag == "ttags") {
+            $this->Error(">> ttags << is reserved TAG Name.");
+        }
 
-        if ($tag == "ttags") $this->Error(">> ttags << is reserved TAG Name.");
-        if ($tag == "") $this->Error("Empty TAG Name.");
+        if ($tag == "") {
+            $this->Error("Empty TAG Name.");
+        }
 
         //use case insensitive tags
         $tag = trim(strtoupper($tag));
@@ -127,13 +130,16 @@ class FpdfTables extends \FPDF
      */
     protected function mt_ApplyStyle($tag)
     {
-
         //use case insensitive tags
         $tag = trim(strtoupper($tag));
 
-        if ($this->wt_Current_Tag == $tag) return;
+        if ($this->wt_Current_Tag == $tag) {
+            return;
+        }
 
-        if (($tag == "") || (!isset($this->TagStyle[$tag]))) $tag = "DEFAULT";
+        if (($tag == "") || (!isset($this->TagStyle[$tag]))) {
+            $tag = "DEFAULT";
+        }
 
         $this->wt_Current_Tag = $tag;
 
@@ -169,7 +175,6 @@ class FpdfTables extends \FPDF
         $this->TagStyle['DEFAULT']['color'] = "";
     }
 
-
     /**
      * Divides $this->wt_DataInfo and returnes a line from this variable
      *
@@ -178,7 +183,6 @@ class FpdfTables extends \FPDF
      */
     protected function mt_MakeLine($w)
     {
-
         $aDataInfo = &$this->wt_DataInfo;
         $aExtraInfo = &$this->wt_DataExtraInfo;
 
@@ -267,7 +271,6 @@ class FpdfTables extends \FPDF
                     $last_sepch = $c;//last separator char
                     $last_sepch_width = $char_width;//last separator char
                     $last_sepwidth = $s_width;
-
                 }
 
                 if ($c == "\t") {//TAB
@@ -278,9 +281,10 @@ class FpdfTables extends \FPDF
                 if ($bParagraph == true) {
                     $c = $s[$i] = "";
                     $char_width = $this->wt_TempData['LAST_TAB_REQSIZE'] * 1000 - $this->wt_TempData['LAST_TAB_SIZE'];
-                    if ($char_width < 0) $char_width = 0;
+                    if ($char_width < 0) {
+                        $char_width = 0;
+                    }
                 }
-
 
                 $line_width += $char_width;
 
@@ -319,7 +323,6 @@ class FpdfTables extends \FPDF
                             $i = $last_sep + 1;
                             $s_width = $last_sepwidth + $last_sepch_width;
                         }
-
                     } elseif (count($aLine) > 0) {
                         //we have elements in the last tag!!!!
                         if ($last_sepch == " ") {//the last tag ends with a space, have to remove it
@@ -334,13 +337,12 @@ class FpdfTables extends \FPDF
 
                                 //imediat return from this function
                                 break 2;
-                            } else {
-                                #die("should not be!!!");
                             }
                         }
-                    } else
-
+                    } else {
                         $return_result = true;
+                    }
+
                     break;
                 }
 
@@ -358,29 +360,38 @@ class FpdfTables extends \FPDF
             $sTmpStr = substr($sTmpStr, $i, strlen($sTmpStr));
 
             if (($sTmpStr == "") || ($sTmpStr === FALSE))//empty
+            {
                 array_shift($aDataInfo);
-
-            if ($val['text'] == $str) {
             }
 
-            if (!isset($val['href'])) $val['href'] = '';
-            if (!isset($val['ypos'])) $val['ypos'] = 0;
+            if ($val['text'] == $str) {
+                // TODO: What is it for?
+            }
+
+            if (!isset($val['href'])) {
+                $val['href'] = '';
+            }
+
+            if (!isset($val['ypos'])) {
+                $val['ypos'] = 0;
+            }
 
             //we have a partial result
-            array_push($aLine, array(
-                'text' => $str,
-                'tag' => $val['tag'],
-                'href' => $val['href'],
-                'width' => $s_width,
+            $aLine[] = array(
+                'text'   => $str,
+                'tag'    => $val['tag'],
+                'href'   => $val['href'],
+                'width'  => $s_width,
                 'spaces' => $spaces,
-                'ypos' => $val['ypos']
-            ));
+                'ypos'   => $val['ypos']
+            );
 
             $this->wt_TempData['LAST_TAB_SIZE'] = $s_width;
             $this->wt_TempData['LAST_TAB_REQSIZE'] = (isset($val['size'])) ? $val['size'] : 0;
 
-            if ($return_result) break;//break this for
-
+            if ($return_result) {
+                break;
+            }//break this for
         }
 
         // Check the first and last tag -> if first and last caracters are " " space remove them!!!"
@@ -403,7 +414,10 @@ class FpdfTables extends \FPDF
 
         if ($reset_spaces) {//this is used in case of a "Explicit Line Break"
             //put all spaces to 0 so in case of "J" align there is no space extension
-            for ($k = 0; $k < count($aLine); $k++) $aLine[$k]['spaces'] = 0;
+            $aLineCount = count($aLine);
+            for ($k = 0; $k < $aLineCount; $k++) {
+                $aLine[$k]['spaces'] = 0;
+            }
         }
 
         return $aLine;
@@ -462,7 +476,6 @@ class FpdfTables extends \FPDF
      */
     public function MultiCellTag($w, $h, $pData, $border = 0, $align = 'J', $fill = 0, $pad_left = 0, $pad_top = 0, $pad_right = 0, $pad_bottom = 0, $pDataIsString = true)
     {
-
         //save the current style settings, this will be the default in case of no style is specified
         $this->mt_SaveCurrentStyle();
         $this->mt_Reset_Datas();
@@ -480,13 +493,15 @@ class FpdfTables extends \FPDF
                     $this->utf8_decoded = true;
                 }
             }
+
             $this->mt_DivideByTags($pData);
         }
 
         $b = $b1 = $b2 = $b3 = '';//borders
 
-        if ($w == 0)
+        if ($w == 0) {
             $w = $this->w - $this->rMargin - $this->x;
+        }
 
         /**
          * If the vertical padding is bigger than the width then we ignore it
@@ -510,10 +525,14 @@ class FpdfTables extends \FPDF
                 $b3 = 'LRB';//without the top
             } else {
                 $b2 = '';
-                if (is_int(strpos($border, 'L')))
+                if (is_int(strpos($border, 'L'))) {
                     $b2 .= 'L';
-                if (is_int(strpos($border, 'R')))
+                }
+
+                if (is_int(strpos($border, 'R'))) {
                     $b2 .= 'R';
+                }
+
                 $b1 = is_int(strpos($border, 'T')) ? $b2 . 'T' : $b2;
                 $b3 = is_int(strpos($border, 'B')) ? $b2 . 'B' : $b2;
             }
@@ -535,7 +554,6 @@ class FpdfTables extends \FPDF
         }
 
         while (!$last_line) {
-
             if ($first_line && ($pad_top > 0)) {
                 /**
                  * If this is the first line and there is top_padding
@@ -573,7 +591,6 @@ class FpdfTables extends \FPDF
             $this->SetX($startX + $pad_left);
             $this->mt_PrintLine($w_text, $h, $str_data, $align);
 
-
             //see what border we draw:
             if ($first_line && $last_line) {
                 //we have only 1 line
@@ -600,8 +617,9 @@ class FpdfTables extends \FPDF
                 $this->Cell($w, $h, "", $real_brd, 2);
             }
 
-
-            if ($first_line) $first_line = false;
+            if ($first_line) {
+                $first_line = false;
+            }
         }//while(! $last_line){
 
         //APPLY THE DEFAULT STYLE
@@ -610,10 +628,11 @@ class FpdfTables extends \FPDF
         $this->x = $this->lMargin;
 
         //UTF8 Support
-        if (isset($this->utf8_support) && isset($this->utf8_decoded)) {
-            if (true == $utf8_decoded_here) $this->utf8_decoded = false;
+        if (isset($this->utf8_support, $this->utf8_decoded)) {
+            if (true == $utf8_decoded_here) {
+                $this->utf8_decoded = false;
+            }
         }
-
     }
 
     /**
@@ -626,7 +645,6 @@ class FpdfTables extends \FPDF
      */
     protected function mt_DivideByTags($pStr, $return = false)
     {
-
         $pStr = str_replace("\t", "<ttags>\t</ttags>", $pStr);
         $pStr = str_replace(PARAGRAPH_STRING, "<pparg>\t</pparg>", $pStr);
         $pStr = str_replace("\r", "", $pStr);
@@ -640,6 +658,7 @@ class FpdfTables extends \FPDF
         if ($return) {
             return $this->wt_DataInfo;
         }
+
         return null;
     }
 
@@ -654,7 +673,6 @@ class FpdfTables extends \FPDF
      */
     protected function mt_StringToLines($w = 0, $pStr)
     {
-
         //save the current style settings, this will be the default in case of no style is specified
         $this->mt_SaveCurrentStyle();
         $this->mt_Reset_Datas();
@@ -666,7 +684,6 @@ class FpdfTables extends \FPDF
         $aStrLines = [];
 
         while (!$last_line) {
-
             //make a line
             $str_data = $this->mt_MakeLine($w);
             array_push($aStrLines, $str_data);
@@ -681,22 +698,21 @@ class FpdfTables extends \FPDF
         return $aStrLines;
     }//function mt_StringToLines
 
-
     /**
      * Draws a Tag Based formatted line returned from mt_MakeLine function into the pdf document
      *
      * @access    protected
      * @param int $w - width of the text
      * @param int $h - height of a line
-     * @param string $aTxt - text to be draw
+     * @param $aTxt - text to be draw
      * @param string $align - align of the text
      * @return    void
      */
     protected function mt_PrintLine($w, $h, $aTxt, $align = 'J')
     {
-
-        if ($w == 0)
+        if ($w == 0) {
             $w = $this->w - $this->rMargin - $this->x;
+        }
 
         $wmax = $w; //Maximum width
 
@@ -719,6 +735,7 @@ class FpdfTables extends \FPDF
                 if ($total_spaces > 0) {
                     $extra_space = ($wmax - 2 * $this->cMargin - $total_width) / $total_spaces;
                 }
+
                 break;
             case 'L':
                 break;
@@ -726,7 +743,7 @@ class FpdfTables extends \FPDF
                 $w_first = ($wmax - $total_width) / 2;
                 break;
             case 'R':
-                $w_first = $wmax - $total_width - $this->cMargin;;
+                $w_first = $wmax - $total_width - $this->cMargin;
                 break;
         }
 
@@ -738,8 +755,7 @@ class FpdfTables extends \FPDF
         $last_width = $wmax - $w_first;
         $lastY = 0;
 
-        while (list($key, $val) = each($aTxt)) {
-
+        foreach ($aTxt as $val) {
             $bYPosUsed = false;
 
             //apply current tag style
@@ -757,7 +773,10 @@ class FpdfTables extends \FPDF
             //string width
             $width = $val['width'] / 1000;
 
-            if ($width == 0) continue;// No width jump over!!!
+            if ($width == 0) {
+                // No width jump over!!!
+                continue;
+            }
 
             if ($align == 'J') {
                 if ($val['spaces'] < 1) $temp_X = 0;
@@ -784,8 +803,9 @@ class FpdfTables extends \FPDF
                 $last_width -= $extra_X;
             }
 
-            if ($bYPosUsed) $this->y = $lastY;
-
+            if ($bYPosUsed) {
+                $this->y = $lastY;
+            }
         }//while
 
         // Output the Last Cell
@@ -793,7 +813,6 @@ class FpdfTables extends \FPDF
             $this->Cell($last_width, $h, "", 0, 0, "", 0);
         }
     }
-
 
     /**
      * Number of Columns of the Table
@@ -940,7 +959,6 @@ class FpdfTables extends \FPDF
         return (int)$this->w - $this->rMargin - $this->lMargin;
     }//function PageWidth
 
-
     /**
      * Returns the current page Height
      *
@@ -953,7 +971,6 @@ class FpdfTables extends \FPDF
         return (int)$this->h - $this->tMargin - $this->bMargin;
     }//function PageHeight
 
-
     /**
      * CONSTRUCTOR
      * Table Initialization Function
@@ -962,11 +979,9 @@ class FpdfTables extends \FPDF
      * @param    integer - $iColumnsNr - Number of Colums
      * @param    boolean - $bTableHeaderDraw    - true => Draw the table header on a new page
      * @param    boolean - $bTableBorderDraw - true => Draw the table border
-     * @return    null
      */
     public function tbInitialize($iColumnsNr = 0, $bTableHeaderDraw = true, $bTableBorderDraw = true)
     {
-
         $this->iColumnsNr = $iColumnsNr;
         $this->aTableHeaderType = Array();
         $this->bTableHeaderDraw = $bTableHeaderDraw;
@@ -1038,20 +1053,21 @@ class FpdfTables extends \FPDF
      */
     public function tbSetHeaderType($aHeaderType, $bMultiLines = false)
     {
-        if ($bMultiLines == false)
+        if ($bMultiLines == false) {
             $this->aTableHeaderType[0] = $aHeaderType;
-        else
+        } else {
             $this->aTableHeaderType = $aHeaderType;
+        }
 
         //create the header cache data
-        foreach ($this->aTableHeaderType as $val)
+        foreach ($this->aTableHeaderType as $val) {
             $this->_tbAddDataToCache($val, 'header');
+        }
 
         $this->_tbCacheParseRowspan(0, 'header');
 
         $this->tbHeaderHeight();
     }
-
 
     /**
      * Calculates the Header Height.
@@ -1075,7 +1091,6 @@ class FpdfTables extends \FPDF
         }
     }//private function tbHeaderHeight
 
-
     /**
      * Calculates the X margin of the table depending on the ALIGN
      *
@@ -1085,8 +1100,6 @@ class FpdfTables extends \FPDF
      */
     protected function tbMarkMarginX()
     {
-
-
         if (isset($this->aTableType['TB_ALIGN'])) {
             $tb_align = $this->aTableType['TB_ALIGN'];
         } else {
@@ -1107,7 +1120,6 @@ class FpdfTables extends \FPDF
         }//
 
     }//protected function tbMarkMarginX
-
 
     /*
     Characteristics constants for Data Type:
@@ -1156,7 +1168,6 @@ class FpdfTables extends \FPDF
         $this->aTableDataType = $aDataType;
     }//function tbSetDataType
 
-
     /**
      * Sets the Table Type
      *
@@ -1174,15 +1185,18 @@ class FpdfTables extends \FPDF
      */
     public function tbSetTableType($aTableType)
     {
+        if (isset($aTableType['iColumnsNr'])) {
+            $this->iColumnsNr = $aTableType['iColumnsNr'];
+        }
 
-        if (isset($aTableType['iColumnsNr'])) $this->iColumnsNr = $aTableType['iColumnsNr'];
-        if (!isset($aTableType['L_MARGIN'])) $aTableType['L_MARGIN'] = 0;//default values
+        if (!isset($aTableType['L_MARGIN'])) {
+            $aTableType['L_MARGIN'] = 0;
+        } //default values
 
         $this->aTableType = $aTableType;
         $this->tbMarkMarginX();
 
     }//function tbSetTableType
-
 
     /**
      * Draws the Table Border
@@ -1193,10 +1207,14 @@ class FpdfTables extends \FPDF
      */
     public function tbDrawBorder()
     {
+        if (!$this->bTableBorderDraw) {
+            return;
+        }
 
-        if (!$this->bTableBorderDraw) return;
-
-        if (!$this->bDataOnCurrentPage) return; //there was no data on the current page
+        if (!$this->bDataOnCurrentPage) {
+            //there was no data on the current page
+            return;
+        }
 
         //set the colors
         list($r, $g, $b) = $this->aTableType['BRD_COLOR'];
@@ -1214,7 +1232,6 @@ class FpdfTables extends \FPDF
 
     }//function tbDrawBorder
 
-
     /**
      * End Page Special Border Draw. This is called in the case of a Page Split
      *
@@ -1224,20 +1241,18 @@ class FpdfTables extends \FPDF
      */
     protected function _tbEndPageBorder()
     {
-        if (isset($this->aTableType['BRD_TYPE_END_PAGE'])) {
+        if (isset($this->aTableType['BRD_TYPE_END_PAGE'])
+            && strpos($this->aTableType['BRD_TYPE_END_PAGE'], 'B') >= 0
+        ) {
+            //set the colors
+            list($r, $g, $b) = $this->aTableType['BRD_COLOR'];
+            $this->SetDrawColor($r, $g, $b);
 
-            if (strpos($this->aTableType['BRD_TYPE_END_PAGE'], 'B') >= 0) {
+            //set the line width
+            $this->SetLineWidth($this->aTableType['BRD_SIZE']);
 
-                //set the colors
-                list($r, $g, $b) = $this->aTableType['BRD_COLOR'];
-                $this->SetDrawColor($r, $g, $b);
-
-                //set the line width
-                $this->SetLineWidth($this->aTableType['BRD_SIZE']);
-
-                //draw the line
-                $this->Line(0, $this->GetY(), $this->tbGetWidth(), $this->GetY());
-            }//fi
+            //draw the line
+            $this->Line(0, $this->GetY(), $this->tbGetWidth(), $this->GetY());
         }//fi
     }//function _tbEndPageBorder
 
@@ -1260,20 +1275,17 @@ class FpdfTables extends \FPDF
         return $tb_width;
     }//tbGetWidth
 
-
     /**
      * Aligns the table to the Start X point
      *
      * @access        protected
      * @param        void
      * @return        void
-     *
      */
     protected function _tbAlign()
     {
         $this->SetX($this->iTableStartX);
     }//function _tbAlign(){
-
 
     /**
      * "Draws the Header".
@@ -1285,12 +1297,10 @@ class FpdfTables extends \FPDF
      */
     public function tbDrawHeader()
     {
-
         foreach ($this->aHeaderCache as $val) {
             $this->aDataCache[] = $val;
         }
     }
-
 
     /**
      * Adds a line to the Table Data or Header Cache.
@@ -1299,7 +1309,6 @@ class FpdfTables extends \FPDF
      * @access    public
      * @param    array $data - Data to be Drawed
      * @param bool $header - Array Containing data is Header Data or Data Data
-     * @return    null
      */
     public function tbDrawData($data, $header = false)
     {
@@ -1327,16 +1336,19 @@ class FpdfTables extends \FPDF
         } elseif ($sDataType == 'header') {
             $aDataCache = &$this->aHeaderCache;
         }
-        $aRowSpan = array();
 
+        $aRowSpan = array();
 
         $hm = 0;
 
         /**
          * If datacache is empty initialize it
          */
-        if (count($aDataCache) > 0) $aLastDataCache = end($aDataCache);
-        else $aLastDataCache = array();
+        if (count($aDataCache) > 0) {
+            $aLastDataCache = end($aDataCache);
+        } else {
+            $aLastDataCache = array();
+        }
 
         //this variable will contain the active colspans
         $iActiveColspan = 0;
@@ -1344,20 +1356,66 @@ class FpdfTables extends \FPDF
         //calculate the maximum height of the cells
         for ($i = 0; $i < $this->iColumnsNr; $i++) {
 
-            if (!isset($data[$i]['TEXT']) || ($data[$i]['TEXT'] == '')) $data[$i]['TEXT'] = ' ';
-            if (!isset($data[$i]['T_FONT'])) $data[$i]['T_FONT'] = $this->aTableDataType[$i]['T_FONT'];
-            if (!isset($data[$i]['T_TYPE'])) $data[$i]['T_TYPE'] = $this->aTableDataType[$i]['T_TYPE'];
-            if (!isset($data[$i]['T_SIZE'])) $data[$i]['T_SIZE'] = $this->aTableDataType[$i]['T_SIZE'];
-            if (!isset($data[$i]['T_COLOR'])) $data[$i]['T_COLOR'] = $this->aTableDataType[$i]['T_COLOR'];
-            if (!isset($data[$i]['T_ALIGN'])) $data[$i]['T_ALIGN'] = $this->aTableDataType[$i]['T_ALIGN'];
-            if (!isset($data[$i]['V_ALIGN'])) $data[$i]['V_ALIGN'] = $this->aTableDataType[$i]['V_ALIGN'];
-            if (!isset($data[$i]['LN_SIZE'])) $data[$i]['LN_SIZE'] = $this->aTableDataType[$i]['LN_SIZE'];
-            if (!isset($data[$i]['BRD_SIZE'])) $data[$i]['BRD_SIZE'] = $this->aTableDataType[$i]['BRD_SIZE'];
-            if (!isset($data[$i]['BRD_COLOR'])) $data[$i]['BRD_COLOR'] = $this->aTableDataType[$i]['BRD_COLOR'];
-            if (!isset($data[$i]['BRD_TYPE'])) $data[$i]['BRD_TYPE'] = $this->aTableDataType[$i]['BRD_TYPE'];
-            if (!isset($data[$i]['BG_COLOR'])) $data[$i]['BG_COLOR'] = $this->aTableDataType[$i]['BG_COLOR'];
-            if (!isset($data[$i]['COLSPAN'])) $data[$i]['COLSPAN'] = 1; else $data[$i]['COLSPAN'] = (int)$data[$i]['COLSPAN'];
-            if (!isset($data[$i]['ROWSPAN'])) $data[$i]['ROWSPAN'] = 1; else $data[$i]['ROWSPAN'] = (int)$data[$i]['ROWSPAN'];
+            if (!isset($data[$i]['TEXT']) || ($data[$i]['TEXT'] == '')) {
+                $data[$i]['TEXT'] = ' ';
+            }
+
+            if (!isset($data[$i]['T_FONT'])) {
+                $data[$i]['T_FONT'] = $this->aTableDataType[$i]['T_FONT'];
+            }
+
+            if (!isset($data[$i]['T_TYPE'])) {
+                $data[$i]['T_TYPE'] = $this->aTableDataType[$i]['T_TYPE'];
+            }
+
+            if (!isset($data[$i]['T_SIZE'])) {
+                $data[$i]['T_SIZE'] = $this->aTableDataType[$i]['T_SIZE'];
+            }
+
+            if (!isset($data[$i]['T_COLOR'])) {
+                $data[$i]['T_COLOR'] = $this->aTableDataType[$i]['T_COLOR'];
+            }
+
+            if (!isset($data[$i]['T_ALIGN'])) {
+                $data[$i]['T_ALIGN'] = $this->aTableDataType[$i]['T_ALIGN'];
+            }
+
+            if (!isset($data[$i]['V_ALIGN'])) {
+                $data[$i]['V_ALIGN'] = $this->aTableDataType[$i]['V_ALIGN'];
+            }
+
+            if (!isset($data[$i]['LN_SIZE'])) {
+                $data[$i]['LN_SIZE'] = $this->aTableDataType[$i]['LN_SIZE'];
+            }
+
+            if (!isset($data[$i]['BRD_SIZE'])) {
+                $data[$i]['BRD_SIZE'] = $this->aTableDataType[$i]['BRD_SIZE'];
+            }
+
+            if (!isset($data[$i]['BRD_COLOR'])) {
+                $data[$i]['BRD_COLOR'] = $this->aTableDataType[$i]['BRD_COLOR'];
+            }
+
+            if (!isset($data[$i]['BRD_TYPE'])) {
+                $data[$i]['BRD_TYPE'] = $this->aTableDataType[$i]['BRD_TYPE'];
+            }
+
+            if (!isset($data[$i]['BG_COLOR'])) {
+                $data[$i]['BG_COLOR'] = $this->aTableDataType[$i]['BG_COLOR'];
+            }
+
+            if (!isset($data[$i]['COLSPAN'])) {
+                $data[$i]['COLSPAN'] = 1;
+            } else {
+                $data[$i]['COLSPAN'] = (int)$data[$i]['COLSPAN'];
+            }
+
+            if (!isset($data[$i]['ROWSPAN'])) {
+                $data[$i]['ROWSPAN'] = 1;
+            } else {
+                $data[$i]['ROWSPAN'] = (int)$data[$i]['ROWSPAN'];
+            }
+
             $data[$i]['HEIGHT'] = 0;    //default HEIGHT
             $data[$i]['SKIP'] = false;    //default SKIP (don't skip)
             $data[$i]['CELL_WIDTH'] = $this->aTableHeaderType[0][$i]['WIDTH'];    //copy this from the header settings
@@ -1402,29 +1460,25 @@ class FpdfTables extends \FPDF
                     }
 
                     continue; //jump to the next column
-
                 }//if
-
             }//if
-
 
             //set the font settings
             $this->SetFont($data[$i]['T_FONT'],
                 $data[$i]['T_TYPE'],
-                $data[$i]['T_SIZE']);
-
+                $data[$i]['T_SIZE']
+            );
 
             /**
              * If we have colspan then we ignore the "colspanned" cells
              */
             if ($data[$i]['COLSPAN'] > 1) {
-
                 for ($j = 1; $j < $data[$i]['COLSPAN']; $j++) {
                     //if there is a colspan, then calculate the number of lines also with the with of the next cell
-                    if (($i + $j) < $this->iColumnsNr)
+                    if (($i + $j) < $this->iColumnsNr) {
                         $data[$i]['CELL_WIDTH'] += $this->aTableHeaderType[0][$i + $j]['WIDTH'];
+                    }
                 }//for
-
             }//if
 
             //add the cells that are with rowspan to the rowspan array - this is used later
@@ -1435,10 +1489,12 @@ class FpdfTables extends \FPDF
                 $aRowSpan[] = $i;
             }
 
-
             //$MaxLines = floor($AvailPageH / $data[$i]['LN_SIZE']);//floor this value, must be the lowest possible
 
-            if (!isset($data[$i]['TEXT_STRLINES'])) $data[$i]['TEXT_STRLINES'] = $this->mt_StringToLines($data[$i]['CELL_WIDTH'], $data[$i]['TEXT']);
+            if (!isset($data[$i]['TEXT_STRLINES'])) {
+                $data[$i]['TEXT_STRLINES'] = $this->mt_StringToLines($data[$i]['CELL_WIDTH'], $data[$i]['TEXT']);
+            }
+
             $data[$i]['CELL_LINES'] = count($data[$i]['TEXT_STRLINES']);
 
             /**
@@ -1459,14 +1515,13 @@ class FpdfTables extends \FPDF
 
         }//for($i=0; $i < $this->iColumnsNr; $i++)
 
-
         $aDataCache[] = array(
-            'HEIGHT' => $hm,    //THIS LINE MAXIMUM HEIGHT
-            'DEFAULT_HEIGHT' => $hm,    //THIS LINE DEFAULT MAXIMUM HEIGHT
+            'HEIGHT'             => $hm,        // THIS LINE MAXIMUM HEIGHT
+            'DEFAULT_HEIGHT'     => $hm,        // THIS LINE DEFAULT MAXIMUM HEIGHT
             'DEFAULT_HEIGHT_SET' => true,
-            'DATATYPE' => $sDataType,    //The data Type - Data/Header
-            'DATA' => $data,    //this line's data
-            'ROWSPAN' => $aRowSpan    //rowspan ID array
+            'DATATYPE'           => $sDataType, // The data Type - Data/Header
+            'DATA'               => $data,      // this line's data
+            'ROWSPAN'            => $aRowSpan   // rowspan ID array
         );
 
         //we set the rowspan in cache variable to true if we have a rowspan
@@ -1476,7 +1531,6 @@ class FpdfTables extends \FPDF
 
         return;
     }//function _tbAddDataToCache
-
 
     /**
      * Parses the Data Cache and calculates the maximum Height of each row. Normally the cell Height of a row is calculated
@@ -1489,11 +1543,11 @@ class FpdfTables extends \FPDF
      */
     protected function _tbCacheParseRowspan($iStartIndex = 0, $sCacheType = 'data')
     {
-
-        if ($sCacheType == 'data')
+        if ($sCacheType == 'data') {
             $aDataCache = &$this->aDataCache;
-        else
+        } else {
             $aDataCache = &$this->aHeaderCache;
+        }
 
         $aRowSpans = array();
 
@@ -1503,16 +1557,23 @@ class FpdfTables extends \FPDF
 
             $val = &$aDataCache[$ix];
 
-            if (!in_array($val['DATATYPE'], array('data', 'header'))) continue;
+            if (!in_array($val['DATATYPE'], array('data', 'header'))) {
+                continue;
+            }
 
             //if there is no rowspan jump over
-            if (empty($val['ROWSPAN'])) continue;
+            if (empty($val['ROWSPAN'])) {
+                continue;
+            }
 
             foreach ($val['ROWSPAN'] as $k) {
 
                 #$val['HEIGHT'] = $val['DEFAULT_HEIGHT'];
 
-                if ($val['DATA'][$k]['ROWSPAN'] < 1) continue;    //skip the rows without rowspan
+                if ($val['DATA'][$k]['ROWSPAN'] < 1) {
+                    //skip the rows without rowspan
+                    continue;
+                }
 
                 /**
                  * if ($val['DEFAULT_HEIGHT_SET'] == false){
@@ -1529,8 +1590,9 @@ class FpdfTables extends \FPDF
 
                 //calculate the sum of the Heights for the lines that are included in the rowspan
                 for ($i = 0; $i < $val['DATA'][$k]['ROWSPAN']; $i++) {
-                    if (isset($aDataCache[$ix + $i]))
+                    if (isset($aDataCache[$ix + $i])) {
                         $h_rows += $aDataCache[$ix + $i]['HEIGHT'];
+                    }
                 }
 
                 //this is the cell height that makes the rowspan
@@ -1557,7 +1619,6 @@ class FpdfTables extends \FPDF
             }//foreach
         }//foreach
 
-
         /**
          * Calculate the height of each cell that makes the rowspan.
          * The height of this cell is the sum of the heights of the rows where the rowspan occurs
@@ -1567,15 +1628,16 @@ class FpdfTables extends \FPDF
             $h_rows = 0;
             //calculate the sum of the Heights for the lines that are included in the rowspan
             for ($i = 0; $i < $val1['cell_id']['ROWSPAN']; $i++) {
-                if (isset($aDataCache[$val1['row_id'] + $i]))
+                if (isset($aDataCache[$val1['row_id'] + $i])) {
                     $h_rows += $aDataCache[$val1['row_id'] + $i]['HEIGHT'];
+                }
             }
+
             $val1['cell_id']['HEIGHT_MAX'] = $h_rows;
             if (false == $this->bTableSplit) {
                 $aDataCache[$val1['row_id']]['HEIGHT_ROWSPAN'] = $h_rows;
             }
         }
-
     }//function _tbCacheParseRowspan
 
 
@@ -1590,7 +1652,6 @@ class FpdfTables extends \FPDF
      */
     protected function tbSplitCell(&$aCellData, $iHeightRow = 0, $iHeightMax = 0)
     {
-
         //$aTData will contain the second cell data
         $aCell2Data = $aCellData;
 
@@ -1675,7 +1736,6 @@ class FpdfTables extends \FPDF
      */
     protected function _tbCachePaginate()
     {
-
         $iPageHeight = $this->PageHeight();
 
         /**
@@ -1801,7 +1861,9 @@ class FpdfTables extends \FPDF
                                 /**
                                  * The cell is Skipped or is a Rowspan. For active split we handle rowspanned cells later
                                  */
-                                if (($aData[$j]['SKIP'] === TRUE) || ($aData[$j]['ROWSPAN'] > 1)) continue;
+                                if (($aData[$j]['SKIP'] === TRUE) || ($aData[$j]['ROWSPAN'] > 1)) {
+                                    continue;
+                                }
 
                                 list($aTData[$j]) = $this->tbSplitCell($aData[$j], $val['HEIGHT'], $iLeftHeightLast);
 
@@ -1820,12 +1882,9 @@ class FpdfTables extends \FPDF
                              * Parse separately the rows with the ROWSPAN
                              */
 
-
                             $bNeedParseCache = false;
 
-
-                            foreach ($aRowSpans as $rws_key => $rws) {
-
+                            foreach ($aRowSpans as $rws) {
                                 $rData = &$aDC[$rws[0]]['DATA'][$rws[1]];
 
                                 if ($rData['HEIGHT_MAX'] > $rData['HEIGHT_LEFT_RW']) {
@@ -1852,8 +1911,9 @@ class FpdfTables extends \FPDF
                             //Insert the new page, and get the new number of the lines
                             $iItems = $this->tbInsertNewPage($i, $v_new);
 
-                            if ($bNeedParseCache) $this->_tbCacheParseRowspan($i + 1);
-
+                            if ($bNeedParseCache) {
+                                $this->_tbCacheParseRowspan($i + 1);
+                            }
                         } else {
 
                             /***************************************************
@@ -1875,7 +1935,10 @@ class FpdfTables extends \FPDF
 
                                 $rData = &$aDC[$rws[0]]['DATA'][$rws[1]];
 
-                                if ($rws[0] == $i) continue;    //means that this was added at the last line, that will not appear on this page
+                                if ($rws[0] == $i) {
+                                    // means that this was added at the last line, that will not appear on this page
+                                    continue;
+                                }
 
                                 if ($rData['HEIGHT_MAX'] > $rData['HEIGHT_LEFT_RW']) {
                                     /**
@@ -1900,7 +1963,9 @@ class FpdfTables extends \FPDF
                                 }//fi
                             }//for
 
-                            if ($bNeedParseCache) $this->_tbCacheParseRowspan($i);
+                            if ($bNeedParseCache) {
+                                $this->_tbCacheParseRowspan($i);
+                            }
 
                             //Insert the new page, and get the new number of the lines
                             $iItems = $this->tbInsertNewPage($i);
@@ -1921,7 +1986,6 @@ class FpdfTables extends \FPDF
 
     }//function _tbCachePaginate
 
-
     /**
      * Inserts a new page in the Data Cache, after the specified Index. If sent then also a new data is inserted after the new page
      *
@@ -1933,7 +1997,6 @@ class FpdfTables extends \FPDF
      */
     protected function tbInsertNewPage($iIndex, $rNewData = null, $bInsertHeader = true)
     {
-
         //the number of lines that the header contains
         if ((true == $this->bTableHeaderDraw) && (true == $bInsertHeader)) {
             $iHeaderLines = count($this->aHeaderCache);
@@ -1945,8 +2008,11 @@ class FpdfTables extends \FPDF
         $iItems = count($aDC);        //the number of elements in the cache
 
         //if we have a NewData to be inserted after the new page then we have to shift the data with 1
-        if (null != $rNewData) $iShift = 1;
-        else $iShift = 0;
+        if ($rNewData != null) {
+            $iShift = 1;
+        } else {
+            $iShift = 0;
+        }
 
         //shift the array with the number of lines that the header contains + one line for the new page
         for ($j = $iItems; $j > $iIndex; $j--) {
@@ -1960,7 +2026,6 @@ class FpdfTables extends \FPDF
 
         $j = $iShift;
 
-
         if ($iHeaderLines > 0) {
             //only if we have a header
 
@@ -1968,22 +2033,21 @@ class FpdfTables extends \FPDF
             foreach ($this->aHeaderCache as $rHeaderVal) {
                 $j++;
                 $aDC[$iIndex + $j] = $rHeaderVal;
-            }//foreach
+            } // foreach
 
-        }//fi
+        } // fi
 
         if (1 == $iShift) {
             $j++;
             $aDC[$iIndex + $j] = $rNewData;
-        }//fi
+        } // fi
 
         /**/
         $this->bDataOnCurrentPage = false;
 
         return count($aDC);
 
-    }//function tbInsertNewPage
-
+    } // function tbInsertNewPage
 
     /**
      * Sends all the Data Cache to the PDF Document.
@@ -1995,7 +2059,6 @@ class FpdfTables extends \FPDF
      */
     protected function _tbCachePrepOutputData()
     {
-
         $aDataCache = &$this->aDataCache;
 
         $iItems = count($aDataCache);
@@ -2007,7 +2070,7 @@ class FpdfTables extends \FPDF
             //each array contains one line
             $this->_tbAlign();
 
-            if ($val['DATATYPE'] == 'new_page') {
+            if ($val['DATATYPE'] === 'new_page') {
                 //add a new page
                 $this->tbAddPage();
                 continue;
@@ -2024,11 +2087,7 @@ class FpdfTables extends \FPDF
 
                 if ($data[$i]['SKIP'] === FALSE) {
 
-                    if (isset($data[$i]['HEIGHT_MAX']))
-                        $h = $data[$i]['HEIGHT_MAX'];
-                    else
-                        $h = $val['HEIGHT'];
-
+                    $h = $data[$i]['HEIGHT_MAX'] ?? $val['HEIGHT'];
 
                     //border size BRD_SIZE
                     $this->SetLineWidth($data[$i]['BRD_SIZE']);
@@ -2048,7 +2107,8 @@ class FpdfTables extends \FPDF
                     //Set the font, font type and size
                     $this->SetFont($data[$i]['T_FONT'],
                         $data[$i]['T_TYPE'],
-                        $data[$i]['T_SIZE']);
+                        $data[$i]['T_SIZE']
+                    );
 
                     //print the text
                     $this->tbMultiCellTbl(
@@ -2070,17 +2130,15 @@ class FpdfTables extends \FPDF
                 if (isset($data[$i]['COLSPAN'])) {
                     $i = $i + (int)$data[$i]['COLSPAN'] - 1;
                 }
-
-            }//for
+            } // for
 
             $this->bDataOnCurrentPage = true;
 
             //Go to the next line
             $this->Ln($val['HEIGHT']);
-        }//foreach
+        } // foreach
 
-    }//function _tbCachePrepOutputData
-
+    } // function _tbCachePrepOutputData
 
     /**
      * Prepares the cache for Output.
@@ -2092,21 +2150,20 @@ class FpdfTables extends \FPDF
      */
     protected function _tbCachePrepOutput()
     {
-
-        if ($this->bRowSpanInCache) $this->_tbCacheParseRowspan();
+        if ($this->bRowSpanInCache) {
+            $this->_tbCacheParseRowspan();
+        }
 
         $this->_tbCachePaginate();
 
         $this->_tbCachePrepOutputData();
     }
 
-
     /**
      * Adds a new page in the pdf document and initializes the table and the header if necessary.
      */
     protected function tbAddPage()
     {
-
         $this->tbDrawBorder();//draw the table border
 
         $this->_tbEndPageBorder();//if there is a special handling for end page??? this is specific for me
@@ -2134,7 +2191,6 @@ class FpdfTables extends \FPDF
         $this->iTableStartX = $this->GetX();
         $this->iTableStartY = $this->GetY();
         $this->tbMarkMarginX();
-
     }
 
     /**
@@ -2157,14 +2213,13 @@ class FpdfTables extends \FPDF
      */
     function tbMultiCellTbl($w, $h, $txtData, $border = 0, $align = 'J', $valign = 'T', $fill = 0, $vh = 0, $vtop = 0, $pad_left = 0, $pad_top = 0, $pad_right = 0, $pad_bottom = 0)
     {
-
-        $b1 = '';//border for top cell
-        $b2 = '';//border for middle cell
-        $b3 = '';//border for bottom cell
+        $b1 = ''; // border for top cell
+        $b2 = ''; // border for middle cell
+        $b3 = ''; // border for bottom cell
         $wh_Top = 0;
 
-        if ($vtop > 0) {//if this parameter is set
-            if ($vtop < $vh) {//only if the top add-on is bigger than the add-width
+        if ($vtop > 0) { // if this parameter is set
+            if ($vtop < $vh) { // only if the top add-on is bigger than the add-width
                 $wh_Top = $vtop;
                 $vh = $vh - $vtop;
             }
@@ -2178,13 +2233,16 @@ class FpdfTables extends \FPDF
                 $b3 = 'LRB';//without the top
             } else {
                 $b2 = '';
-                if (is_int(strpos($border, 'L')))
+                if (is_int(strpos($border, 'L'))) {
                     $b2 .= 'L';
-                if (is_int(strpos($border, 'R')))
+                }
+
+                if (is_int(strpos($border, 'R'))) {
                     $b2 .= 'R';
+                }
+
                 $b1 = is_int(strpos($border, 'T')) ? $b2 . 'T' : $b2;
                 $b3 = is_int(strpos($border, 'B')) ? $b2 . 'B' : $b2;
-
             }
         }
 
@@ -2243,7 +2301,6 @@ class FpdfTables extends \FPDF
 
     }
 
-
     /**
      * Sends to the pdf document the cache data
      *
@@ -2258,8 +2315,9 @@ class FpdfTables extends \FPDF
         //IF UTF8 Support is needed then
         if (isset($this->utf8_support) && ($this->utf8_support)) {
             //keep the compatibility with the "old" fpdf utf8 support.
-            if (isset($this->utf8_decoded)) $this->utf8_decoded = false;
+            if (isset($this->utf8_decoded)) {
+                $this->utf8_decoded = false;
+            }
         }
     }
-
 }

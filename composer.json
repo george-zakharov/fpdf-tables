@@ -1,11 +1,24 @@
 {
-	"name": "smichaelsen/fpdf-tables",
-	"require": {
-        	"setasign/fpdf": "1.8.*"
-	},
-	"autoload": {
-		"psr-4": {
-			"Smichaelsen\\FpdfTables\\": "Classes/"
-		}
-	}
+    "name": "george-zakharov/fpdf-tables-extended",
+    "description": "This library provides generation of PDF tables with FPDF.\nThis library is originally forked from https://github.com/smichaelsen/fpdf-tables.",
+    "type": "library",
+    "license": "MIT",
+    "keywords": ["pdf","fpdf"],
+    "homepage": "https://github.com/george-zakharov/fpdf-tables-extended",
+    "authors": [
+        {
+            "name": "George Zakharov",
+            "email": "george_zakharov@mail.ru"
+        }
+    ],
+    "minimum-stability": "dev",
+    "require": {
+        "php": ">=8.1",
+        "setasign/fpdf": "1.8.*"
+    },
+    "autoload": {
+        "psr-4": {
+            "GeorgeZakharov\\FpdfTablesExtended\\": "Classes/"
+        }
+    }
 }
